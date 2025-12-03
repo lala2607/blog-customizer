@@ -12,7 +12,7 @@ import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 import styles from './Select.module.scss';
 
 type SelectProps = {
-	selected: OptionType; 
+	selected: OptionType | null;
 	options: OptionType[];
 	placeholder?: string;
 	onChange?: (selected: OptionType) => void;
@@ -25,7 +25,7 @@ export const Select = (props: SelectProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const rootRef = useRef<HTMLDivElement>(null);
 	const placeholderRef = useRef<HTMLDivElement>(null);
-	const optionClassName = selected.optionClassName ?? '';
+	const optionClassName = selected?.optionClassName ?? '';
 
 	useOutsideClickClose({
 		isOpen,
@@ -67,30 +67,32 @@ export const Select = (props: SelectProps) => {
 						styles.placeholder,
 						(styles as Record<string, string>)[optionClassName]
 					)}
-					data-selected={!!selected.value}
+					data-status={status}
+					data-selected={!!selected?.value}
 					onClick={handlePlaceHolderClick}
 					role='button'
 					tabIndex={0}
 					ref={placeholderRef}>
 					<Text
 						family={
-							isFontFamilyClass(selected.className)
-								? selected.className
+							isFontFamilyClass(selected?.className)
+								? selected?.className
 								: undefined
 						}>
-						{selected.title || placeholder}
+						{selected?.title || placeholder}
 					</Text>
 				</div>
 				{isOpen && (
 					<ul className={styles.select} data-testid='selectDropdown'>
-						{options.map((option) => (
-							<Option
-								key={option.value}
-								option={option}
-								onClick={() => handleOptionClick(option)}
-								isSelected={option.value === selected.value} 
-							/>
-						))}
+						{options
+							.filter((option) => selected?.value !== option.value)
+							.map((option) => (
+								<Option
+									key={option.value}
+									option={option}
+									onClick={() => handleOptionClick(option)}
+								/>
+							))}
 					</ul>
 				)}
 			</div>
