@@ -12,20 +12,29 @@ import { useOutsideClickClose } from './hooks/useOutsideClickClose';
 import styles from './Select.module.scss';
 
 type SelectProps = {
-	selected: OptionType | null;
+	selected: OptionType;
 	options: OptionType[];
 	placeholder?: string;
 	onChange?: (selected: OptionType) => void;
 	onClose?: () => void;
 	title?: string;
+	hideSelected?: boolean;
 };
 
 export const Select = (props: SelectProps) => {
-	const { options, placeholder, selected, onChange, onClose, title } = props;
+	const { 
+		options, 
+		placeholder, 
+		selected, 
+		onChange, 
+		onClose, 
+		title, 
+		hideSelected = false 
+	} = props;
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const rootRef = useRef<HTMLDivElement>(null);
 	const placeholderRef = useRef<HTMLDivElement>(null);
-	const optionClassName = selected?.optionClassName ?? '';
+	const optionClassName = selected.optionClassName ?? '';
 
 	useOutsideClickClose({
 		isOpen,
@@ -43,9 +52,14 @@ export const Select = (props: SelectProps) => {
 		setIsOpen(false);
 		onChange?.(option);
 	};
+
 	const handlePlaceHolderClick: MouseEventHandler<HTMLDivElement> = () => {
 		setIsOpen((isOpen) => !isOpen);
 	};
+
+	const filteredOptions = hideSelected 
+		? options.filter(option => option.value !== selected.value)
+		: options;
 
 	return (
 		<div className={styles.container}>
@@ -67,32 +81,30 @@ export const Select = (props: SelectProps) => {
 						styles.placeholder,
 						(styles as Record<string, string>)[optionClassName]
 					)}
-					data-status={status}
-					data-selected={!!selected?.value}
+					data-selected={!!selected.value}
 					onClick={handlePlaceHolderClick}
 					role='button'
 					tabIndex={0}
 					ref={placeholderRef}>
 					<Text
 						family={
-							isFontFamilyClass(selected?.className)
-								? selected?.className
+							isFontFamilyClass(selected.className)
+								? selected.className
 								: undefined
 						}>
-						{selected?.title || placeholder}
+						{selected.title || placeholder}
 					</Text>
 				</div>
 				{isOpen && (
 					<ul className={styles.select} data-testid='selectDropdown'>
-						{options
-							.filter((option) => selected?.value !== option.value)
-							.map((option) => (
-								<Option
-									key={option.value}
-									option={option}
-									onClick={() => handleOptionClick(option)}
-								/>
-							))}
+						{filteredOptions.map((option) => (
+							<Option
+								key={option.value}
+								option={option}
+								onClick={() => handleOptionClick(option)}
+								isSelected={option.value === selected.value && !hideSelected}
+							/>
+						))}
 					</ul>
 				)}
 			</div>
