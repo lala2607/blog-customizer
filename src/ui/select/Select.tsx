@@ -18,7 +18,7 @@ type SelectProps = {
 	onChange?: (selected: OptionType) => void;
 	onClose?: () => void;
 	title?: string;
-	hideSelected?: boolean; // Для шрифтов: true, для цветов: false
+	hideSelected?: boolean;
 };
 
 export const Select = (props: SelectProps) => {
@@ -57,7 +57,6 @@ export const Select = (props: SelectProps) => {
 		setIsOpen((isOpen) => !isOpen);
 	};
 
-	// Фильтруем options если нужно скрыть выбранный (для шрифтов)
 	const filteredOptions = hideSelected 
 		? options.filter(option => option.value !== selected.value)
 		: options;
